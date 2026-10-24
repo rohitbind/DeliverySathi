@@ -1,36 +1,26 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Delivery Sathi
 
-## Getting Started
+Landing site and seller onboarding for Delivery Sathi — an AI agent that talks to COD buyers in Hindi, Hinglish, and English so more parcels get delivered.
 
-First, run the development server:
+Product truth lives in `PRODUCT.md`. The site deploys on Vercel. Supabase helpers are provisioned and unused until a project is connected.
+
+## Run locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Open [http://localhost:3000](http://localhost:3000). Seller onboarding is at `/onboard`.
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Import this repository in Vercel. Framework preset: Next.js. No environment variables are required for the current site. Onboarding submissions validate on the server and log the payload until Supabase is wired.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Supabase, later
+
+1. Create a project in Supabase.
+2. Copy `.env.example` into `.env.local` and set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (same on Vercel).
+3. Insert from `parseOnboardingForm` / `submitOnboarding` once a `sellers` table exists.
+4. Call `createClient` from `lib/supabase/client.ts` or `server.ts` as needed.
+5. For auth, mount `updateSession` from `lib/supabase/update-session.ts` in a root `proxy.ts`.
