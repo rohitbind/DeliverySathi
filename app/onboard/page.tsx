@@ -12,43 +12,42 @@ export const ensureStatic = "navigation";
 
 export default function OnboardPage() {
   return (
-    <div className="mx-auto grid w-full max-w-6xl gap-10 px-5 py-12 sm:px-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16 lg:py-16">
-      <aside className="lg:sticky lg:top-10 lg:self-start">
-        <p className="font-display text-sm font-semibold tracking-wide text-brand">
-          Store onboarding
-        </p>
-        <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight text-balance text-brand-deep sm:text-5xl">
-          Get Sathi on your COD orders.
-        </h1>
-        <p className="mt-4 max-w-md text-base leading-7 text-muted">
-          About ten answers: who you are, where you sell, how you ship. Then
-          Sathi can talk to your buyers in Hindi, Hinglish, or English.
-        </p>
-        <ul className="mt-8 space-y-3 text-sm leading-6 text-muted">
-          <li>For own-store and D2C sellers shipping COD.</li>
-          <li>Marketplace-only shops are politely turned away.</li>
-          <li>
-            Prefer chat?{" "}
-            <a
-              href="https://t.me/DeliverySathibot"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium text-brand underline-offset-4 hover:underline"
-            >
-              @DeliverySathibot
-            </a>
-          </li>
-        </ul>
-        <Link
-          href="/"
-          className="mt-8 inline-block text-sm font-medium text-foreground underline-offset-4 hover:underline"
-        >
-          Back to home
-        </Link>
-      </aside>
+    <div className="field">
+      <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-12 sm:px-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] pt-28 lg:gap-16 lg:py-20 lg:pt-36">
+        <aside className="lg:sticky lg:top-10 lg:self-start">
+          <h1 className="display text-[clamp(2.6rem,5.5vw,4.2rem)] text-balance">
+            Ship Sathi to your store.
+          </h1>
+          <p className="mt-5 max-w-md text-lg leading-8 text-ink-soft">
+            About ten answers: who you are, where you sell, how you ship. Then
+            Sathi can talk to your buyers in Hindi, Hinglish, or English.
+          </p>
+          <ul className="mt-8 max-w-md space-y-3 border-t border-line pt-5 text-sm leading-6 text-ink-soft">
+            <li>For own-store and D2C sellers shipping COD.</li>
+            <li>Marketplace-only shops are politely turned away.</li>
+            <li>
+              Prefer chat?{" "}
+              <a
+                href="https://t.me/DeliverySathibot"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-violet underline-offset-[5px] hover:underline"
+              >
+                @DeliverySathibot
+              </a>
+            </li>
+          </ul>
+          <Link
+            href="/"
+            className="mt-8 inline-block text-sm font-semibold text-ink underline-offset-[6px] hover:underline"
+          >
+            Back to home
+          </Link>
+        </aside>
 
-      <div className="rounded-[1.75rem] border border-line bg-surface px-5 py-7 shadow-[0_24px_50px_-36px_rgba(6,53,50,0.55)] sm:px-8 sm:py-9">
-        <OnboardingForm />
+        <div className="glass rounded-[1.75rem] px-5 py-7 sm:px-8 sm:py-9">
+          <OnboardingForm />
+        </div>
       </div>
     </div>
   );

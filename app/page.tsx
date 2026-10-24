@@ -1,345 +1,386 @@
 import Link from "next/link";
-import { ChatPreview } from "@/components/chat-preview";
+import { DeliveryChat } from "@/components/delivery-chat";
+import { ReturnsCalculator } from "@/components/returns-calculator";
 
-const cityLoss = [
-  { place: "Metros", first: "72–78%", returned: "18–24%" },
-  { place: "Tier 1", first: "65–72%", returned: "24–30%" },
-  { place: "Tier 2", first: "58–65%", returned: "30–38%" },
-  { place: "Tier 3 / rural", first: "45–58%", returned: "38–50%" },
+const zones = [
+  { place: "Metros", first: "72–78%", low: 18, high: 24 },
+  { place: "Tier 1", first: "65–72%", low: 24, high: 30 },
+  { place: "Tier 2", first: "58–65%", low: 30, high: 38 },
+  { place: "Tier 3 and rural", first: "45–58%", low: 38, high: 50 },
 ] as const;
+
+const SCALE_MAX = 50;
 
 const moments = [
   {
     title: "After the order",
-    detail:
-      "Sathi confirms the buyer still wants it, grabs a landmark or pin, and can push UPI — before the parcel even leaves.",
+    sathi:
+      "Checks the buyer still wants it, gets a landmark or pincode, and can send a UPI link, before the parcel leaves your warehouse.",
+    today:
+      "Checkout OTP proves the number exists, not that they want the parcel days later. Confirm SMS and IVR take one snapshot, and IVR pickup is only 5–8%. Risk scores need volume and turn off COD for good buyers too.",
   },
   {
     title: "Out for delivery",
-    detail:
-      "Checks someone is home. If not, reschedules or fixes the address before your rider wastes the trip.",
+    sathi:
+      "Checks someone is home. If not, reschedules or fixes the address before the rider wastes the trip.",
+    today: "Nobody talks to the buyer. The rider finds out at the door.",
   },
   {
     title: "After a failed attempt",
+    sathi:
+      "Asks what happened in the buyer’s own words, books a reattempt, or logs a no-show claim you can send to the courier.",
+    today:
+      "NDR dashboards. You chase courier portals by hand, usually after the reattempt window has closed.",
+  },
+] as const;
+
+const outcomes = [
+  {
+    said: "Ab nahi chahiye, cancel kar do",
+    action: "Stopped before dispatch",
+    detail: "The order never ships, so there is no ₹200 return to pay for.",
+    tone: "ink",
+  },
+  {
+    said: "Gali number galat hai, 4 nahi 14 hai",
+    action: "Address fixed",
     detail:
-      "Asks what happened at the door in the buyer’s words, books a reattempt, or logs a no-show claim you can send to the courier.",
+      "The courier gets the corrected address before the rider heads out.",
+    tone: "ink",
+  },
+  {
+    said: "Delivery boy aaya hi nahi",
+    action: "No-show claim",
+    detail:
+      "Logged in the buyer’s exact words for your courier dispute, with a reattempt offered.",
+    tone: "rto",
+  },
+  {
+    said: "Haan ghar pe hoon. UPI se de doon?",
+    action: "UPI link sent",
+    detail: "Paid before the rider arrives. No hunting for change at the door.",
+    tone: "delivered",
   },
 ] as const;
 
-const vsToday = [
-  {
-    fix: "Checkout OTP",
-    shortfall: "Proves the number exists — not that they still want the parcel days later.",
-  },
-  {
-    fix: "Confirm SMS / IVR",
-    shortfall: "One snapshot. Silence kills real buyers. IVR pickup is only 5–8%.",
-  },
-  {
-    fix: "RTO risk scores",
-    shortfall: "Needs volume. Blunt cuts turn off COD for good buyers too.",
-  },
-  {
-    fix: "NDR dashboards",
-    shortfall: "You chase courier portals by hand, usually too late for the window.",
-  },
-] as const;
-
-const sellerGains = [
+const contents = [
   {
     title: "Fewer returns on the same ad spend",
     detail:
-      "Sathi works the three moments that decide delivery, so more of the orders you already paid to acquire actually land.",
+      "More of the orders you already paid to win actually get delivered.",
   },
   {
     title: "Actions, not another dashboard",
     detail:
-      "Every chat ends as a reschedule, address fix, UPI link, courier instruction, or no-show claim — back in your flow.",
+      "Every chat ends as a reschedule, address fix, UPI link, courier instruction or no-show claim, sent back into your flow.",
   },
   {
-    title: "Buyer’s words for disputes",
+    title: "The buyer’s words for disputes",
     detail:
-      "When the rider never came, you get the claim in the buyer’s exact Hinglish — not a silent NDR code.",
+      "When the rider never came, you get the claim in the buyer’s own Hinglish, not a silent NDR code.",
   },
   {
-    title: "Live in about 10 messages",
+    title: "Live in about ten answers",
     detail:
-      "Onboard on the web or on Telegram. Own-store and D2C sellers only; marketplace-only shops are turned away.",
+      "Onboard on the web or on Telegram. For own-store D2C sellers; marketplace-only shops are turned away.",
   },
 ] as const;
 
-const recoveries = [
-  {
-    said: "Aaj ghar pe koi nahi, kal shaam aa jao",
-    forYou: "Reschedule booked for next evening — your parcel stays alive.",
-  },
-  {
-    said: "Delivery boy aaya hi nahi",
-    forYou: "No-show claim logged in their words, reattempt offered.",
-  },
-  {
-    said: "Out for delivery — will someone be home?",
-    forYou: "Home check + UPI nudge before the rider burns the attempt.",
-  },
-] as const;
+const toneClass = {
+  ink: "bg-white text-ink",
+  rto: "bg-rto/10 text-rto",
+  delivered: "bg-delivered/10 text-delivered",
+} as const;
 
 export const ensureStatic = "navigation";
 
 export default function Home() {
   return (
     <>
-      <section className="relative overflow-hidden border-b border-line">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(10,79,74,0.08)_0%,transparent_42%),linear-gradient(180deg,transparent_60%,rgba(232,238,242,1)_100%)]"
-        />
-        <div className="relative mx-auto grid w-full max-w-6xl items-center gap-12 px-5 py-14 sm:px-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-16 lg:py-20">
-          <div className="hero-copy">
-            <p className="font-display text-4xl font-semibold tracking-tight text-brand-deep sm:text-5xl lg:text-[3.5rem] lg:leading-[1.05]">
-              Delivery Sathi
-            </p>
-            <h1 className="mt-5 max-w-xl font-display text-3xl leading-[1.12] font-semibold tracking-tight text-balance sm:text-4xl">
-              Cut your COD returns. Keep the orders you already paid for.
-            </h1>
-            <p className="mt-5 max-w-md text-lg leading-8 text-muted">
-              An AI agent talks to your buyers in Hindi, Hinglish, or English —
-              after the order, out for delivery, and right after a failed
-              attempt — then sends the action back to you.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Link
-                href="/onboard"
-                className="inline-flex h-12 items-center rounded-full bg-signal px-6 text-sm font-semibold text-white transition-colors hover:bg-[#d94f20]"
-              >
-                Onboard your store
-              </Link>
-              <a
-                href="https://t.me/DeliverySathibot"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex h-12 items-center rounded-full border border-brand/25 bg-surface px-6 text-sm font-semibold text-brand-deep transition-colors hover:border-brand/50"
-              >
-                Or go live on Telegram
-              </a>
-            </div>
+      {/* Hero: centred title over a drifting gradient */}
+      <section className="field">
+        <div className="mx-auto flex w-full max-w-6xl flex-col items-center px-4 pt-36 pb-20 text-center sm:px-8 sm:pt-44 sm:pb-28">
+          <p className="kicker hero-in">For D2C sellers shipping COD</p>
+          <h1
+            className="display hero-in mt-7 max-w-5xl text-[clamp(2.9rem,8.4vw,6.4rem)] text-balance"
+            style={{ "--d": "120ms" } as React.CSSProperties}
+          >
+            Fewer returns.
+            <br />
+            More parcels delivered.
+          </h1>
+          <p
+            className="hero-in mt-8 max-w-[36rem] text-lg leading-8 text-ink-soft sm:text-xl sm:leading-9"
+            style={{ "--d": "260ms" } as React.CSSProperties}
+          >
+            Sathi talks to your COD buyers in Hindi, Hinglish or English, after
+            checkout, on delivery day and right after a failed attempt, then
+            hands you back the fix.
+          </p>
+          <div
+            className="hero-in mt-10 flex flex-wrap items-center justify-center gap-3"
+            style={{ "--d": "380ms" } as React.CSSProperties}
+          >
+            <Link
+              href="/onboard"
+              className="inline-flex h-12 items-center rounded-full bg-ink px-7 text-base font-medium text-white shadow-[0_14px_30px_-14px_rgba(27,22,34,0.6)] transition-[transform,background-color] hover:-translate-y-0.5 hover:bg-violet-deep active:translate-y-0"
+            >
+              Onboard your store
+            </Link>
+            <a
+              href="https://t.me/DeliverySathibot"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-12 items-center rounded-full border border-white bg-white/55 px-7 text-base font-medium text-ink backdrop-blur transition-[transform,background-color] hover:-translate-y-0.5 hover:bg-white/85"
+            >
+              Go live on Telegram
+            </a>
           </div>
-          <ChatPreview />
+          <div
+            className="hero-in mt-16 w-full sm:mt-20"
+            style={{ "--d": "520ms" } as React.CSSProperties}
+          >
+            <DeliveryChat />
+          </div>
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-        <div className="max-w-2xl">
-          <h2 className="font-display text-3xl font-semibold tracking-tight text-brand-deep sm:text-4xl">
-            You are losing 20 to 40% of COD orders
+      {/* The loss */}
+      <section className="mx-auto w-full max-w-6xl px-4 py-24 sm:px-8 sm:py-32">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="kicker">The cost of COD</p>
+          <h2 className="display mt-5 text-[clamp(2.2rem,5vw,3.6rem)] text-balance">
+            The farther the pincode, the more comes back.
           </h2>
-          <p className="mt-4 text-base leading-7 text-muted">
-            The more you sell into tier 2 and 3, the worse first-attempt
-            delivery gets. Every return costs about ₹200 — and the ad spend
-            behind that order is already gone.
+          <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-ink-soft">
+            Sellers lose 20 to 40% of COD orders. Sell into tier 2 and 3 and up
+            to half can return, each costing about ₹200, while the ad spend that
+            won the order is already gone.
           </p>
         </div>
-        <div className="mt-10 overflow-x-auto">
-          <table className="w-full min-w-[32rem] text-left text-sm">
-            <thead>
-              <tr className="border-b border-line text-muted">
-                <th className="py-3 pr-4 font-medium">Where you ship</th>
-                <th className="py-3 pr-4 font-medium">First attempt works</th>
-                <th className="py-3 font-medium">Returned</th>
-              </tr>
-            </thead>
-            <tbody>
-              {cityLoss.map((row) => (
-                <tr key={row.place} className="border-b border-line">
-                  <td className="py-3.5 pr-4 font-medium text-foreground">
-                    {row.place}
-                  </td>
-                  <td className="py-3.5 pr-4 tabular-nums text-muted">
-                    {row.first}
-                  </td>
-                  <td className="py-3.5 font-display text-lg font-semibold text-signal tabular-nums">
-                    {row.returned}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="mt-6 text-xs text-muted">
-          From the Delivery Sathi deck (Base.com India benchmarks 2026).
-        </p>
-      </section>
 
-      <section className="border-y border-line bg-surface">
-        <div className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-          <h2 className="max-w-2xl font-display text-3xl font-semibold tracking-tight text-brand-deep sm:text-4xl">
-            What you use today only sees one moment
-          </h2>
-          <p className="mt-4 max-w-xl text-base leading-7 text-muted">
-            Nobody talks to the buyer on delivery day — or in the minutes after
-            a failed attempt. That gap is where your returns pile up.
-          </p>
-          <ul className="mt-10 divide-y divide-line border-y border-line">
-            {vsToday.map((item) => (
+        <div className="glass mt-14 rounded-[1.75rem] px-5 py-3 sm:px-8">
+          <div className="hidden grid-cols-[11rem_7rem_1fr_6rem] gap-6 border-b border-line py-4 text-sm text-ink-soft md:grid">
+            <p>Where you ship</p>
+            <p>First attempt</p>
+            <p>Share of COD parcels returned</p>
+            <p className="text-right">Returned</p>
+          </div>
+          <ul className="divide-y divide-line">
+            {zones.map((zone) => (
               <li
-                key={item.fix}
-                className="grid gap-2 py-5 md:grid-cols-[14rem_1fr] md:gap-8"
+                key={zone.place}
+                className="grid grid-cols-[1fr_auto] items-center gap-x-6 gap-y-3 py-5 md:grid-cols-[11rem_7rem_1fr_6rem]"
               >
-                <p className="font-medium text-foreground">{item.fix}</p>
-                <p className="text-sm leading-6 text-muted">{item.shortfall}</p>
+                <p className="text-lg font-medium">{zone.place}</p>
+                <p className="hidden text-ink-soft tabular-nums md:block">
+                  {zone.first}
+                </p>
+                <div
+                  className="col-span-2 row-start-2 md:col-span-1 md:row-start-auto"
+                  role="img"
+                  aria-label={`${zone.low} to ${zone.high} percent returned`}
+                >
+                  <div className="relative h-2.5 overflow-hidden rounded-full bg-line/70">
+                    <div
+                      className="scroll-bar grad-bar absolute inset-y-0 left-0 rounded-full"
+                      style={{ width: `${(zone.high / SCALE_MAX) * 100}%` }}
+                    />
+                  </div>
+                </div>
+                <p className="text-right text-2xl font-semibold text-rto tabular-nums">
+                  {zone.low}–{zone.high}%
+                </p>
               </li>
             ))}
           </ul>
         </div>
+        <p className="mt-5 text-center text-xs text-ink-soft">
+          Ranges from the Delivery Sathi deck, based on Base.com India
+          benchmarks 2026. Bars run to the top of each range on a 0–50% scale.
+        </p>
       </section>
 
-      <section
-        id="how"
-        className="scroll-mt-8 border-b border-line bg-brand-deep text-white"
-      >
-        <div className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-          <h2 className="max-w-xl font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-            Sathi works the three moments that decide your delivery
-          </h2>
-          <ol className="mt-12 grid gap-8 md:grid-cols-3 md:gap-6">
-            {moments.map((moment, index) => (
-              <li key={moment.title}>
-                <p className="font-display text-5xl font-semibold text-white/20 tabular-nums">
-                  {index + 1}
-                </p>
-                <h3 className="mt-3 font-display text-xl font-semibold">
-                  {moment.title}
-                </h3>
-                <p className="mt-3 text-sm leading-7 text-white/75">
-                  {moment.detail}
-                </p>
-              </li>
-            ))}
-          </ol>
+      {/* The route: three moments */}
+      <section id="how" className="field field-rose route-scope scroll-mt-4">
+        <div className="mx-auto w-full max-w-6xl px-4 py-24 sm:px-8 sm:py-32">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="kicker">How it works</p>
+            <h2 className="display mt-5 text-[clamp(2.2rem,5vw,3.6rem)] text-balance">
+              Three moments decide every delivery.
+            </h2>
+            <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-ink-soft">
+              The tools you use today each see one moment. Nobody talks to the
+              buyer on delivery day, or in the minutes after a failed attempt.
+              Sathi is at all three.
+            </p>
+          </div>
+
+          <div className="relative mt-16 md:mt-20">
+            {/* Route line with a parcel riding it (desktop) */}
+            <div
+              aria-hidden
+              className="absolute top-5 right-0 left-5 hidden h-0.5 rounded-full bg-white/70 md:block"
+            >
+              <div className="route-progress grad-line absolute inset-0 rounded-full" />
+              <div className="route-parcel absolute top-1/2 left-0 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet shadow-[0_0_0_6px_rgba(79,60,201,0.18),0_0_24px_4px_rgba(79,60,201,0.45)]" />
+            </div>
+            <ol className="grid gap-6 md:grid-cols-3">
+              {moments.map((moment, index) => (
+                <li key={moment.title} className="relative md:pt-16">
+                  <span
+                    aria-hidden
+                    className="absolute top-0 left-0 hidden size-10 place-items-center rounded-full border border-white bg-white/80 text-sm font-semibold text-violet shadow-sm md:grid"
+                  >
+                    {index + 1}
+                  </span>
+                  <div className="glass h-full rounded-[1.5rem] p-6">
+                    <p className="text-sm font-semibold text-violet md:hidden">
+                      Moment {index + 1}
+                    </p>
+                    <h3 className="display text-[1.9rem]">{moment.title}</h3>
+                    <p className="mt-4 leading-7">{moment.sathi}</p>
+                    <div className="mt-5 border-t border-line pt-4">
+                      <p className="text-sm font-semibold text-ink-soft">
+                        What you have today
+                      </p>
+                      <p className="mt-1 text-sm leading-6 text-ink-soft">
+                        {moment.today}
+                      </p>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-        <h2 className="font-display text-3xl font-semibold tracking-tight text-brand-deep sm:text-4xl">
-          What that looks like on your orders
-        </h2>
-        <ul className="mt-10 space-y-6">
-          {recoveries.map((item) => (
+      {/* What the buyer says, what the seller gets */}
+      <section className="mx-auto w-full max-w-6xl px-4 py-24 sm:px-8 sm:py-32">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="kicker">In the buyer’s words</p>
+          <h2 className="display mt-5 text-[clamp(2.2rem,5vw,3.6rem)] text-balance">
+            Your buyer says it once. You get the fix.
+          </h2>
+        </div>
+        <ul className="mt-14 divide-y divide-line border-y border-line">
+          {outcomes.map((item) => (
             <li
               key={item.said}
-              className="grid gap-3 border-b border-line pb-6 last:border-b-0 last:pb-0 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] md:gap-8"
+              className="scroll-rise grid gap-4 py-8 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] md:items-center md:gap-12"
             >
-              <p className="text-lg leading-8 text-foreground">
-                Buyer: “{item.said}”
-              </p>
-              <p className="text-base leading-7 text-muted">
-                <span className="font-medium text-brand">For you:</span>{" "}
-                {item.forYou}
-              </p>
+              <blockquote className="text-[clamp(1.4rem,2.8vw,2rem)] leading-snug font-light tracking-tight">
+                <span className="sr-only">Buyer: </span>“{item.said}”
+              </blockquote>
+              <div>
+                <p
+                  className={`inline-flex rounded-full px-3.5 py-1.5 text-sm font-semibold shadow-[0_4px_14px_-8px_rgba(58,42,158,0.35)] ${toneClass[item.tone]}`}
+                >
+                  {item.action}
+                </p>
+                <p className="mt-2.5 leading-7 text-ink-soft">{item.detail}</p>
+              </div>
             </li>
           ))}
         </ul>
       </section>
 
-      <section className="border-y border-line bg-surface">
-        <div className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-          <h2 className="font-display text-3xl font-semibold tracking-tight text-brand-deep sm:text-4xl">
-            Built for the seller desk
-          </h2>
-          <ul className="mt-10 grid gap-8 sm:grid-cols-2">
-            {sellerGains.map((gain) => (
-              <li key={gain.title} className="border-t border-line pt-6">
-                <h3 className="font-display text-xl font-semibold text-brand-deep">
-                  {gain.title}
-                </h3>
-                <p className="mt-3 text-sm leading-7 text-muted">{gain.detail}</p>
+      {/* What the seller gets */}
+      <section className="field field-quiet">
+        <div className="mx-auto grid w-full max-w-6xl gap-12 px-4 py-24 sm:px-8 sm:py-32 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-center lg:gap-16">
+          <div>
+            <p className="kicker">For the seller desk</p>
+            <h2 className="display mt-5 text-[clamp(2.2rem,5vw,3.6rem)] text-balance">
+              Works inside the flow you already run.
+            </h2>
+            <p className="mt-6 max-w-sm text-lg leading-8 text-ink-soft">
+              No new screen to watch, no portal to chase.
+            </p>
+          </div>
+          <ul className="glass divide-y divide-line rounded-[1.75rem] px-6 sm:px-8">
+            {contents.map((item) => (
+              <li key={item.title} className="flex gap-4 py-6">
+                <svg
+                  aria-hidden
+                  viewBox="0 0 24 24"
+                  className="mt-0.5 size-7 shrink-0"
+                  fill="none"
+                >
+                  <circle cx="12" cy="12" r="12" fill="var(--violet)" />
+                  <path
+                    d="m7 12.5 3.5 3.5 6.5-7"
+                    className="tick-path scroll-tick"
+                    stroke="#fff"
+                    strokeWidth="2.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <div>
+                  <h3 className="text-lg font-semibold">{item.title}</h3>
+                  <p className="mt-1 leading-7 text-ink-soft">{item.detail}</p>
+                </div>
               </li>
             ))}
           </ul>
         </div>
       </section>
 
-      <section id="pricing" className="scroll-mt-8 mx-auto w-full max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-        <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
-          <div>
-            <h2 className="font-display text-3xl font-semibold tracking-tight text-brand-deep sm:text-4xl">
-              Cheaper than one return
-            </h2>
-            <p className="mt-4 max-w-md text-base leading-7 text-muted">
-              ₹6 per COD order Sathi handles, plus ₹20 when a failed attempt
-              becomes a delivery. A typical return still costs around ₹200.
-            </p>
-            <div className="mt-8 grid grid-cols-2 gap-4">
-              <div className="rounded-3xl bg-brand px-6 py-7 text-white">
-                <p className="font-display text-4xl font-semibold tabular-nums">
-                  ₹6
-                </p>
-                <p className="mt-2 text-sm leading-6 text-white/80">
-                  per COD order handled
-                </p>
-              </div>
-              <div className="rounded-3xl bg-signal px-6 py-7 text-white">
-                <p className="font-display text-4xl font-semibold tabular-nums">
-                  ₹20
-                </p>
-                <p className="mt-2 text-sm leading-6 text-white/85">
-                  per recovered failed attempt
-                </p>
-              </div>
+      {/* Pricing */}
+      <section
+        id="pricing"
+        className="mx-auto grid w-full max-w-6xl scroll-mt-4 items-center gap-14 px-4 py-24 sm:px-8 sm:py-32 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]"
+      >
+        <div>
+          <p className="kicker">Pricing</p>
+          <h2 className="display mt-5 text-[clamp(2.2rem,5vw,3.6rem)] text-balance">
+            Costs less than one return.
+          </h2>
+          <p className="mt-6 max-w-md text-lg leading-8 text-ink-soft">
+            You pay only for the orders Sathi works on. A typical return costs
+            you around ₹200.
+          </p>
+          <dl className="mt-10 grid max-w-md grid-cols-2 gap-4">
+            <div className="rounded-[1.5rem] bg-gradient-to-br from-peach to-rose p-6">
+              <dd className="display text-6xl tabular-nums">₹6</dd>
+              <dt className="mt-3 text-sm leading-5 font-medium text-ink/75">
+                per COD order Sathi handles
+              </dt>
             </div>
-          </div>
-          <aside className="rounded-[1.75rem] border border-line bg-wash/60 px-6 py-7">
-            <p className="font-display text-lg font-semibold text-brand-deep">
-              On 1,000 COD orders a month
-            </p>
-            <p className="mt-2 text-sm leading-6 text-muted">
-              Illustrative brand with 25% returns, ₹1,200 AOV, ₹200 per return.
-              If Sathi prevents 1 in 5 of those returns:
-            </p>
-            <dl className="mt-6 space-y-4 text-sm">
-              <div className="flex items-baseline justify-between gap-4 border-t border-line pt-4">
-                <dt className="text-muted">Returns prevented</dt>
-                <dd className="font-display text-xl font-semibold tabular-nums">
-                  50
-                </dd>
-              </div>
-              <div className="flex items-baseline justify-between gap-4 border-t border-line pt-4">
-                <dt className="text-muted">Return costs saved</dt>
-                <dd className="font-display text-xl font-semibold tabular-nums">
-                  ₹10,000
-                </dd>
-              </div>
-              <div className="flex items-baseline justify-between gap-4 border-t border-line pt-4">
-                <dt className="text-muted">Extra revenue delivered</dt>
-                <dd className="font-display text-xl font-semibold text-brand tabular-nums">
-                  ₹60,000
-                </dd>
-              </div>
-            </dl>
-          </aside>
+            <div className="rounded-[1.5rem] bg-gradient-to-br from-lilac to-[#9d8cf0] p-6">
+              <dd className="display text-6xl tabular-nums">₹20</dd>
+              <dt className="mt-3 text-sm leading-5 font-medium text-ink/75">
+                when a failed attempt becomes a delivery
+              </dt>
+            </div>
+          </dl>
         </div>
+        <ReturnsCalculator />
       </section>
 
-      <section className="border-t border-line bg-[linear-gradient(180deg,var(--wash)_0%,var(--background)_55%)]">
-        <div className="mx-auto flex w-full max-w-6xl flex-col items-start gap-6 px-5 py-16 sm:px-8 sm:py-20">
-          <h2 className="max-w-xl font-display text-3xl font-semibold tracking-tight text-brand-deep sm:text-4xl">
-            Put Sathi on your COD flow
+      {/* Closing call */}
+      <section className="field">
+        <div className="mx-auto flex w-full max-w-6xl flex-col items-center px-4 py-28 text-center sm:px-8 sm:py-36">
+          <h2 className="display max-w-4xl text-[clamp(2.6rem,7vw,5.2rem)] text-balance">
+            Put Sathi on your next COD parcel.
           </h2>
-          <p className="max-w-lg text-base leading-7 text-muted">
-            Tell us about your store — channel, courier, volume, languages —
-            and go live. Same path as{" "}
+          <p className="mt-7 max-w-lg text-lg leading-8 text-ink-soft">
+            Tell us your channel, courier, volume and buyer languages. It takes
+            about ten answers, here or on{" "}
             <a
               href="https://t.me/DeliverySathibot"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-medium text-brand underline-offset-4 hover:underline"
+              className="font-medium text-violet underline-offset-[6px] hover:underline"
             >
               @DeliverySathibot
             </a>
-            , about ten answers. Own-store sellers only.
+            . For sellers with their own store.
           </p>
           <Link
             href="/onboard"
-            className="inline-flex h-12 items-center rounded-full bg-brand px-6 text-sm font-semibold text-white transition-colors hover:bg-brand-deep"
+            className="mt-10 inline-flex h-12 items-center rounded-full bg-ink px-7 text-base font-medium text-white shadow-[0_14px_30px_-14px_rgba(27,22,34,0.6)] transition-[transform,background-color] hover:-translate-y-0.5 hover:bg-violet-deep active:translate-y-0"
           >
             Onboard your store
           </Link>
