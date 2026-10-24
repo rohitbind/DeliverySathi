@@ -5,11 +5,7 @@ import {
   submitOnboarding,
   type OnboardingActionState,
 } from "@/app/onboard/actions";
-import {
-  languages,
-  sellingChannels,
-  volumeBands,
-} from "@/lib/onboarding";
+import { languages, sellingChannels, volumeBands } from "@/lib/onboarding";
 
 const steps = [
   {
@@ -35,13 +31,13 @@ const steps = [
 const initialState: OnboardingActionState = {};
 
 const fieldClass =
-  "mt-2 w-full rounded-xl border border-line bg-surface px-3.5 py-3 text-sm text-foreground outline-none transition-[border-color,box-shadow] placeholder:text-muted/70 focus:border-brand focus:shadow-[0_0_0_3px_rgba(10,79,74,0.15)]";
+  "mt-2 w-full rounded-xl border border-line bg-white/80 px-3.5 py-3 text-base text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-soft/60 focus:border-violet focus:shadow-[0_0_0_4px_rgba(79,60,201,0.14)] focus-visible:outline-none";
 
-const labelClass = "block text-sm font-medium text-foreground";
+const labelClass = "block text-sm font-semibold text-ink";
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
-  return <p className="mt-2 text-sm text-signal">{message}</p>;
+  return <p className="mt-2 text-sm font-medium text-rto">{message}</p>;
 }
 
 export function OnboardingForm() {
@@ -66,14 +62,15 @@ export function OnboardingForm() {
               <button
                 type="button"
                 onClick={() => setStep(index)}
-                className={`inline-flex h-9 items-center rounded-full px-3 text-xs font-medium transition-colors ${
+                aria-current={active ? "step" : undefined}
+                className={`inline-flex h-9 items-center rounded-full border px-3.5 text-sm font-medium transition-colors ${
                   active
-                    ? "bg-brand text-white"
+                    ? "border-ink bg-ink text-white"
                     : hasError
-                      ? "bg-signal/15 text-signal"
+                      ? "border-rto text-rto"
                       : done
-                        ? "bg-wash text-brand-deep"
-                        : "bg-surface text-muted"
+                        ? "border-delivered/40 text-delivered"
+                        : "border-line bg-white/60 text-ink-soft hover:border-lilac"
                 }`}
               >
                 {index + 1}. {item.title}
@@ -84,20 +81,26 @@ export function OnboardingForm() {
       </ol>
 
       <div>
-        <h2 className="font-display text-2xl font-semibold tracking-tight text-brand-deep">
-          {steps[step].title}
-        </h2>
-        <p className="mt-2 text-sm leading-6 text-muted">{steps[step].detail}</p>
+        <h2 className="display text-3xl">{steps[step].title}</h2>
+        <p className="mt-1 text-sm leading-6 text-ink-soft">
+          {steps[step].detail}
+        </p>
       </div>
 
       {errorCount > 0 ? (
-        <p className="rounded-xl border border-signal/30 bg-signal/10 px-4 py-3 text-sm text-signal">
+        <p
+          role="alert"
+          className="rounded-sm border-2 border-rto/40 bg-rto/5 px-4 py-3 text-sm font-medium text-rto"
+        >
           {errors.form ??
             "Some details still need fixing. Steps with issues are marked above."}
         </p>
       ) : null}
 
-      <div className={step === 0 ? "space-y-5" : "hidden"} aria-hidden={step !== 0}>
+      <div
+        className={step === 0 ? "space-y-5" : "hidden"}
+        aria-hidden={step !== 0}
+      >
         <div>
           <label className={labelClass} htmlFor="contactName">
             Your name
@@ -165,20 +168,23 @@ export function OnboardingForm() {
         </div>
       </div>
 
-      <div className={step === 1 ? "space-y-5" : "hidden"} aria-hidden={step !== 1}>
+      <div
+        className={step === 1 ? "space-y-5" : "hidden"}
+        aria-hidden={step !== 1}
+      >
         <fieldset>
           <legend className={labelClass}>Where do you sell?</legend>
           <div className="mt-3 space-y-2">
             {sellingChannels.map((channel) => (
               <label
                 key={channel.value}
-                className="flex cursor-pointer items-start gap-3 rounded-xl border border-line bg-surface px-3.5 py-3 text-sm has-[:checked]:border-brand has-[:checked]:bg-wash/50"
+                className="flex cursor-pointer items-start gap-3 rounded-xl border border-line bg-white/60 px-3.5 py-3 text-sm transition-colors hover:border-lilac has-[:checked]:border-violet has-[:checked]:bg-lilac/25"
               >
                 <input
                   type="radio"
                   name="channel"
                   value={channel.value}
-                  className="mt-0.5 accent-[var(--brand)]"
+                  className="mt-0.5 accent-[var(--violet)]"
                 />
                 <span>{channel.label}</span>
               </label>
@@ -197,14 +203,17 @@ export function OnboardingForm() {
             className={fieldClass}
             placeholder="https://yourstore.in"
           />
-          <p className="mt-2 text-xs text-muted">
+          <p className="mt-2 text-xs text-ink-soft">
             Skip if you do not have a live store link yet.
           </p>
           <FieldError message={errors.storeUrl} />
         </div>
       </div>
 
-      <div className={step === 2 ? "space-y-5" : "hidden"} aria-hidden={step !== 2}>
+      <div
+        className={step === 2 ? "space-y-5" : "hidden"}
+        aria-hidden={step !== 2}
+      >
         <div>
           <label className={labelClass} htmlFor="courier">
             Main courier
@@ -223,13 +232,13 @@ export function OnboardingForm() {
             {volumeBands.map((band) => (
               <label
                 key={band.value}
-                className="flex cursor-pointer items-start gap-3 rounded-xl border border-line bg-surface px-3.5 py-3 text-sm has-[:checked]:border-brand has-[:checked]:bg-wash/50"
+                className="flex cursor-pointer items-start gap-3 rounded-xl border border-line bg-white/60 px-3.5 py-3 text-sm transition-colors hover:border-lilac has-[:checked]:border-violet has-[:checked]:bg-lilac/25"
               >
                 <input
                   type="radio"
                   name="volume"
                   value={band.value}
-                  className="mt-0.5 accent-[var(--brand)]"
+                  className="mt-0.5 accent-[var(--violet)]"
                 />
                 <span>{band.label}</span>
               </label>
@@ -243,13 +252,13 @@ export function OnboardingForm() {
             {languages.map((language) => (
               <label
                 key={language.value}
-                className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-line bg-surface px-3.5 py-2 text-sm has-[:checked]:border-brand has-[:checked]:bg-wash"
+                className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-line bg-white/60 px-3.5 py-2 text-sm transition-colors hover:border-lilac has-[:checked]:border-violet has-[:checked]:bg-lilac/25"
               >
                 <input
                   type="checkbox"
                   name="languages"
                   value={language.value}
-                  className="accent-[var(--brand)]"
+                  className="accent-[var(--violet)]"
                 />
                 {language.label}
               </label>
@@ -276,7 +285,7 @@ export function OnboardingForm() {
           type="button"
           onClick={() => setStep((current) => Math.max(current - 1, 0))}
           disabled={step === 0 || pending}
-          className="h-11 rounded-full px-4 text-sm font-medium text-muted transition-colors hover:text-foreground disabled:opacity-40"
+          className="h-11 rounded-sm px-2 text-sm font-semibold text-ink-soft underline-offset-[6px] transition-colors hover:text-ink hover:underline disabled:opacity-40 disabled:hover:no-underline"
         >
           Back
         </button>
@@ -286,7 +295,7 @@ export function OnboardingForm() {
             onClick={() =>
               setStep((current) => Math.min(current + 1, steps.length - 1))
             }
-            className="inline-flex h-11 items-center rounded-full bg-brand px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-deep"
+            className="inline-flex h-11 items-center rounded-full bg-ink px-5 text-sm font-medium text-white transition-[transform,background-color] hover:-translate-y-px hover:bg-violet-deep"
           >
             Continue
           </button>
@@ -294,7 +303,7 @@ export function OnboardingForm() {
           <button
             type="submit"
             disabled={pending}
-            className="inline-flex h-11 items-center rounded-full bg-signal px-5 text-sm font-semibold text-white transition-colors hover:bg-[#d94f20] disabled:opacity-60"
+            className="inline-flex h-11 items-center rounded-full bg-gradient-to-r from-violet to-[#8a5bd6] px-5 text-sm font-semibold text-white shadow-[0_12px_26px_-12px_rgba(79,60,201,0.7)] transition-transform hover:-translate-y-px disabled:opacity-60"
           >
             {pending ? "Saving…" : "Finish onboarding"}
           </button>

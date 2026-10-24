@@ -1,99 +1,348 @@
 @import "tailwindcss";
 
+/*
+  Delivery Sathi: soft daylight gradients.
+  Peach, lilac and rose light pooling on a pale ground; thin caps display; violet accent.
+*/
 :root {
-  --background: #e8eef2;
-  --foreground: #0b1c1a;
-  --muted: #3d5652;
-  --surface: #ffffff;
-  --line: #c5d4d1;
-  --brand: #0a4f4a;
-  --brand-deep: #063532;
-  --signal: #f05a28;
-  --chat-buyer: #d8f0ec;
-  --wash: #cfe3df;
+  --ground: #f5f1f0;
+  --ink: #1b1622;
+  --ink-soft: #57506a;
+  --line: #e2dcea;
+  --violet: #4f3cc9;
+  --violet-deep: #3a2a9e;
+  --lilac: #c4b5f4;
+  --peach: #f6c8a0;
+  --rose: #f2c3da;
+  --mist: #dfe4f6;
+  --rto: #b8325a;
+  --delivered: #1d7a56;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-muted: var(--muted);
-  --color-surface: var(--surface);
+  --color-ground: var(--ground);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
   --color-line: var(--line);
-  --color-brand: var(--brand);
-  --color-brand-deep: var(--brand-deep);
-  --color-signal: var(--signal);
-  --color-chat-buyer: var(--chat-buyer);
-  --color-wash: var(--wash);
-  --font-sans: var(--font-body);
-  --font-display: var(--font-display);
+  --color-violet: var(--violet);
+  --color-violet-deep: var(--violet-deep);
+  --color-lilac: var(--lilac);
+  --color-peach: var(--peach);
+  --color-rose: var(--rose);
+  --color-mist: var(--mist);
+  --color-rto: var(--rto);
+  --color-delivered: var(--delivered);
+  --font-sans: var(--font-outfit);
+  --font-display: var(--font-italiana);
+}
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-color: var(--lilac) var(--ground);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--ground);
+  color: var(--ink);
 }
 
 ::selection {
-  background: var(--brand);
-  color: #f3faf8;
+  background: var(--lilac);
+  color: var(--ink);
 }
 
 :focus-visible {
-  outline: 2px solid var(--signal);
+  outline: 2px solid var(--violet);
   outline-offset: 3px;
 }
+
+input,
+textarea {
+  caret-color: var(--violet);
+}
+
+/* Thin caps display, as on a title slide. */
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1.04;
+}
+
+.kicker {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--violet);
+}
+
+/* ---------- Gradient fields ---------- */
+
+.field {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+}
+
+.field::before {
+  content: "";
+  position: absolute;
+  inset: -15%;
+  z-index: -1;
+  pointer-events: none;
+  /* Fade the glow out before it meets the section edges. */
+  -webkit-mask-image: linear-gradient(
+    transparent 8%,
+    #000 20%,
+    #000 72%,
+    transparent 87%
+  );
+  mask-image: linear-gradient(
+    transparent 8%,
+    #000 20%,
+    #000 72%,
+    transparent 87%
+  );
+  background:
+    radial-gradient(
+      clamp(220px, 34vw, 520px) clamp(240px, 30vw, 440px) at 50% 40%,
+      color-mix(in oklab, var(--lilac) 90%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      clamp(220px, 34vw, 560px) clamp(220px, 30vw, 460px) at 4% 92%,
+      color-mix(in oklab, var(--peach) 95%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      clamp(200px, 30vw, 480px) clamp(180px, 24vw, 380px) at 62% 100%,
+      color-mix(in oklab, var(--rose) 90%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      clamp(200px, 32vw, 520px) clamp(200px, 30vw, 460px) at 98% 70%,
+      var(--mist),
+      transparent 70%
+    ),
+    radial-gradient(
+      clamp(180px, 26vw, 420px) clamp(180px, 22vw, 360px) at 4% 6%,
+      #f8f1ea,
+      transparent 70%
+    );
+  animation: drift 24s ease-in-out infinite alternate;
+}
+
+.field-quiet::before {
+  background:
+    radial-gradient(
+      clamp(220px, 34vw, 520px) clamp(200px, 28vw, 420px) at 88% 15%,
+      color-mix(in oklab, var(--lilac) 65%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      clamp(220px, 34vw, 520px) clamp(200px, 28vw, 420px) at 8% 90%,
+      color-mix(in oklab, var(--peach) 70%, transparent),
+      transparent 70%
+    );
+}
+
+.field-rose::before {
+  background:
+    radial-gradient(
+      clamp(240px, 36vw, 600px) clamp(240px, 32vw, 520px) at 18% 30%,
+      color-mix(in oklab, var(--rose) 85%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      clamp(240px, 34vw, 560px) clamp(240px, 30vw, 500px) at 85% 75%,
+      color-mix(in oklab, var(--lilac) 80%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      clamp(200px, 28vw, 460px) clamp(180px, 22vw, 360px) at 60% 8%,
+      color-mix(in oklab, var(--peach) 65%, transparent),
+      transparent 70%
+    );
+}
+
+@keyframes drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(3%, -2%, 0) scale(1.05);
+  }
+  100% {
+    transform: translate3d(-2%, 2%, 0) scale(1.02);
+  }
+}
+
+/* Frosted panel floating on the gradient. */
+.glass {
+  background: color-mix(in oklab, white 60%, transparent);
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  border: 1px solid color-mix(in oklab, white 85%, transparent);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 30px 60px -32px rgba(58, 42, 158, 0.35);
+}
+
+.grad-bar {
+  background: linear-gradient(90deg, var(--peach), var(--rose) 45%, var(--rto));
+}
+
+.grad-line {
+  background: linear-gradient(
+    90deg,
+    var(--peach),
+    var(--lilac) 50%,
+    var(--violet)
+  );
+}
+
+/* ---------- Hero conversation sequence ---------- */
 
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(18px);
+    filter: blur(8px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+    filter: blur(0);
   }
 }
 
 @keyframes bubble-in {
   from {
     opacity: 0;
-    transform: translateY(10px) scale(0.98);
+    transform: translateY(8px) scale(0.96);
+    filter: blur(4px);
   }
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+    filter: blur(0);
   }
 }
 
-.hero-copy {
-  animation: rise 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+@keyframes swap-out {
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+    filter: blur(4px);
+  }
 }
 
-.chat-stage {
-  animation: rise 800ms 120ms cubic-bezier(0.16, 1, 0.3, 1) both;
+.hero-in {
+  animation: rise 1100ms var(--d, 0ms) cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.chat-bubble {
-  animation: bubble-in 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+.seq-bubble {
+  animation: bubble-in 560ms var(--d, 0ms) cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.chat-bubble:nth-child(1) {
-  animation-delay: 280ms;
+.seq-swap-out {
+  animation: swap-out 400ms var(--d, 0ms) ease-in forwards;
 }
-.chat-bubble:nth-child(2) {
-  animation-delay: 520ms;
+
+[data-play="wait"] :is(.seq-bubble, .seq-swap-out) {
+  animation-play-state: paused;
 }
-.chat-bubble:nth-child(3) {
-  animation-delay: 760ms;
+
+/* ---------- Scroll-driven motion (progressive) ---------- */
+
+@supports (animation-timeline: view()) {
+  .scroll-bar {
+    transform-origin: left center;
+    animation: bar-fill linear both;
+    animation-timeline: view();
+    animation-range: entry 20% cover 45%;
+  }
+
+  .scroll-tick {
+    animation: tick-draw linear both;
+    animation-timeline: view();
+    animation-range: entry 40% cover 40%;
+  }
+
+  .scroll-rise {
+    animation: rise linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 30%;
+  }
+
+  .route-parcel {
+    animation: route-move linear both;
+    animation-timeline: --route;
+    animation-range: cover 25% cover 75%;
+  }
+
+  .route-progress {
+    transform-origin: left center;
+    animation: bar-fill linear both;
+    animation-timeline: --route;
+    animation-range: cover 25% cover 75%;
+  }
+
+  .route-scope {
+    view-timeline-name: --route;
+  }
 }
-.chat-bubble:nth-child(4) {
-  animation-delay: 1000ms;
+
+@keyframes bar-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes tick-draw {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes route-move {
+  from {
+    left: 0%;
+  }
+  to {
+    left: 100%;
+  }
+}
+
+.tick-path {
+  stroke-dasharray: 24;
+}
+
+input[type="range"] {
+  accent-color: var(--violet);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-copy,
-  .chat-stage,
-  .chat-bubble {
-    animation: none;
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .seq-swap-out {
+    opacity: 0;
   }
 }
