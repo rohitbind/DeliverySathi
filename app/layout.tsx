@@ -59,15 +59,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               >
                 Pricing
               </Link>
-              <Link
-                href="/onboard"
+              <a
+                href="https://t.me/DeliverySathibot"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex h-10 items-center rounded-full bg-ink px-4 font-medium text-white transition-[transform,background-color] hover:-translate-y-px hover:bg-violet-deep active:translate-y-0 sm:px-5"
               >
                 Onboard
                 <span className="hidden min-[400px]:inline">
                   &nbsp;your store
                 </span>
-              </Link>
+              </a>
             </nav>
           </div>
         </header>
@@ -90,14 +92,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 rel="noopener noreferrer"
                 className="font-medium text-violet underline-offset-[6px] hover:underline"
               >
-                @DeliverySathibot on Telegram
+                Onboard your store on Telegram
               </a>
-              <Link
-                href="/onboard"
-                className="text-ink underline-offset-[6px] hover:underline"
-              >
-                Onboard your store
-              </Link>
             </div>
           </div>
         </footer>

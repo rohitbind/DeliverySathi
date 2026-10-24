@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { DeliveryChat } from "@/components/delivery-chat";
 import { ReturnsCalculator } from "@/components/returns-calculator";
 
@@ -82,7 +81,7 @@ const contents = [
   {
     title: "Live in about ten answers",
     detail:
-      "Onboard on the web or on Telegram. For own-store D2C sellers; marketplace-only shops are turned away.",
+      "Onboard on Telegram. For own-store D2C sellers; marketplace-only shops are turned away.",
   },
 ] as const;
 
@@ -121,19 +120,13 @@ export default function Home() {
             className="hero-in mt-10 flex flex-wrap items-center justify-center gap-3"
             style={{ "--d": "380ms" } as React.CSSProperties}
           >
-            <Link
-              href="/onboard"
-              className="inline-flex h-12 items-center rounded-full bg-ink px-7 text-base font-medium text-white shadow-[0_14px_30px_-14px_rgba(27,22,34,0.6)] transition-[transform,background-color] hover:-translate-y-0.5 hover:bg-violet-deep active:translate-y-0"
-            >
-              Onboard your store
-            </Link>
             <a
               href="https://t.me/DeliverySathibot"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-12 items-center rounded-full border border-white bg-white/55 px-7 text-base font-medium text-ink backdrop-blur transition-[transform,background-color] hover:-translate-y-0.5 hover:bg-white/85"
+              className="inline-flex h-12 items-center rounded-full bg-ink px-7 text-base font-medium text-white shadow-[0_14px_30px_-14px_rgba(27,22,34,0.6)] transition-[transform,background-color] hover:-translate-y-0.5 hover:bg-violet-deep active:translate-y-0"
             >
-              Go live on Telegram
+              Onboard your store
             </a>
           </div>
           <div
@@ -367,7 +360,7 @@ export default function Home() {
           </h2>
           <p className="mt-7 max-w-lg text-lg leading-8 text-ink-soft">
             Tell us your channel, courier, volume and buyer languages. It takes
-            about ten answers, here or on{" "}
+            about ten answers on{" "}
             <a
               href="https://t.me/DeliverySathibot"
               target="_blank"
@@ -378,12 +371,14 @@ export default function Home() {
             </a>
             . For sellers with their own store.
           </p>
-          <Link
-            href="/onboard"
+          <a
+            href="https://t.me/DeliverySathibot"
+            target="_blank"
+            rel="noopener noreferrer"
             className="mt-10 inline-flex h-12 items-center rounded-full bg-ink px-7 text-base font-medium text-white shadow-[0_14px_30px_-14px_rgba(27,22,34,0.6)] transition-[transform,background-color] hover:-translate-y-0.5 hover:bg-violet-deep active:translate-y-0"
           >
             Onboard your store
-          </Link>
+          </a>
         </div>
       </section>
     </>
