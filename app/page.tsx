@@ -1,4 +1,5 @@
-import { DeliveryChat } from "@/components/delivery-chat";
+import { HeroVideo } from "@/components/hero-video";
+import { PointerGlow } from "@/components/pointer-glow";
 import { ReturnsCalculator } from "@/components/returns-calculator";
 
 const zones = [
@@ -98,6 +99,7 @@ export default function Home() {
     <>
       {/* Hero: centred title over a drifting gradient */}
       <section className="field">
+        <PointerGlow />
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center px-4 pt-36 pb-20 text-center sm:px-8 sm:pt-44 sm:pb-28">
           <p className="kicker hero-in">For D2C sellers shipping COD</p>
           <h1
@@ -124,16 +126,30 @@ export default function Home() {
               href="https://t.me/DeliverySathibot"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-12 items-center rounded-full bg-ink px-7 text-base font-medium text-white shadow-[0_14px_30px_-14px_rgba(27,22,34,0.6)] transition-[transform,background-color] hover:-translate-y-0.5 hover:bg-violet-deep active:translate-y-0"
+              className="cta inline-flex h-12 items-center gap-2.5 rounded-full bg-ink pr-6 pl-7 text-base font-medium text-white shadow-[0_14px_30px_-14px_rgba(27,22,34,0.6)] transition-[transform,background-color,box-shadow] hover:-translate-y-0.5 hover:bg-violet-deep hover:shadow-[0_18px_36px_-14px_rgba(58,42,158,0.7)] active:translate-y-0 active:scale-[0.98]"
             >
               Onboard your store
+              <svg
+                aria-hidden
+                viewBox="0 0 16 16"
+                className="cta-arrow size-4"
+                fill="none"
+              >
+                <path
+                  d="M4.5 11.5 11.5 4.5M6 4.5h5.5V10"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </a>
           </div>
           <div
             className="hero-in mt-16 w-full sm:mt-20"
             style={{ "--d": "520ms" } as React.CSSProperties}
           >
-            <DeliveryChat />
+            <HeroVideo />
           </div>
         </div>
       </section>
@@ -220,14 +236,14 @@ export default function Home() {
             </div>
             <ol className="grid gap-6 md:grid-cols-3">
               {moments.map((moment, index) => (
-                <li key={moment.title} className="relative md:pt-16">
+                <li key={moment.title} className="moment relative md:pt-16">
                   <span
                     aria-hidden
-                    className="absolute top-0 left-0 hidden size-10 place-items-center rounded-full border border-white bg-white/80 text-sm font-semibold text-violet shadow-sm md:grid"
+                    className="moment-node absolute top-0 left-0 hidden size-10 place-items-center rounded-full border border-white bg-white/80 text-sm font-semibold text-violet shadow-sm md:grid"
                   >
                     {index + 1}
                   </span>
-                  <div className="glass h-full rounded-[1.5rem] p-6">
+                  <div className="moment-card glass h-full rounded-[1.5rem] p-6">
                     <p className="text-sm font-semibold text-violet md:hidden">
                       Moment {index + 1}
                     </p>
@@ -257,7 +273,7 @@ export default function Home() {
             Your buyer says it once. You get the fix.
           </h2>
         </div>
-        <ul className="mt-14 divide-y divide-line border-y border-line">
+        <ul className="outcomes mt-14 divide-y divide-line border-y border-line">
           {outcomes.map((item) => (
             <li
               key={item.said}
@@ -268,7 +284,7 @@ export default function Home() {
               </blockquote>
               <div>
                 <p
-                  className={`inline-flex rounded-full px-3.5 py-1.5 text-sm font-semibold shadow-[0_4px_14px_-8px_rgba(58,42,158,0.35)] ${toneClass[item.tone]}`}
+                  className={`outcome-pill inline-flex rounded-full px-3.5 py-1.5 text-sm font-semibold shadow-[0_4px_14px_-8px_rgba(58,42,158,0.35)] ${toneClass[item.tone]}`}
                 >
                   {item.action}
                 </p>
@@ -375,9 +391,23 @@ export default function Home() {
             href="https://t.me/DeliverySathibot"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-10 inline-flex h-12 items-center rounded-full bg-ink px-7 text-base font-medium text-white shadow-[0_14px_30px_-14px_rgba(27,22,34,0.6)] transition-[transform,background-color] hover:-translate-y-0.5 hover:bg-violet-deep active:translate-y-0"
+            className="mt-10 cta inline-flex h-12 items-center gap-2.5 rounded-full bg-ink pr-6 pl-7 text-base font-medium text-white shadow-[0_14px_30px_-14px_rgba(27,22,34,0.6)] transition-[transform,background-color,box-shadow] hover:-translate-y-0.5 hover:bg-violet-deep hover:shadow-[0_18px_36px_-14px_rgba(58,42,158,0.7)] active:translate-y-0 active:scale-[0.98]"
           >
             Onboard your store
+            <svg
+              aria-hidden
+              viewBox="0 0 16 16"
+              className="cta-arrow size-4"
+              fill="none"
+            >
+              <path
+                d="M4.5 11.5 11.5 4.5M6 4.5h5.5V10"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </a>
         </div>
       </section>

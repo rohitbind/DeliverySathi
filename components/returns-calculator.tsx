@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import { TweenedNumber } from "@/components/tweened-number";
 
 const RETURN_RATE = 0.25;
 const PREVENTED_SHARE = 0.2;
@@ -15,6 +16,8 @@ const rupees = new Intl.NumberFormat("en-IN", {
   maximumFractionDigits: 0,
 });
 const count = new Intl.NumberFormat("en-IN");
+const formatCount = (value: number) => count.format(value);
+const formatRupees = (value: number) => rupees.format(value);
 
 export function ReturnsCalculator() {
   const [orders, setOrders] = useState(1000);
@@ -59,21 +62,27 @@ export function ReturnsCalculator() {
       <dl className="mt-6 divide-y divide-line border-y border-line text-sm">
         <div className="flex justify-between gap-4 py-2.5">
           <dt className="text-ink-soft">Orders that would come back</dt>
-          <dd className="font-medium tabular-nums">{count.format(returns)}</dd>
+          <dd className="font-medium tabular-nums">
+            <TweenedNumber value={returns} format={formatCount} />
+          </dd>
         </div>
         <div className="flex justify-between gap-4 py-2.5">
           <dt className="text-ink-soft">Returns Sathi prevents</dt>
           <dd className="font-medium tabular-nums">
-            {count.format(prevented)}
+            <TweenedNumber value={prevented} format={formatCount} />
           </dd>
         </div>
         <div className="flex justify-between gap-4 py-2.5">
           <dt className="text-ink-soft">Return costs saved</dt>
-          <dd className="font-medium tabular-nums">{rupees.format(saved)}</dd>
+          <dd className="font-medium tabular-nums">
+            <TweenedNumber value={saved} format={formatRupees} />
+          </dd>
         </div>
         <div className="flex justify-between gap-4 py-2.5">
           <dt className="text-ink-soft">Sathi fees, at most</dt>
-          <dd className="font-medium tabular-nums">−{rupees.format(fee)}</dd>
+          <dd className="font-medium tabular-nums">
+            −<TweenedNumber value={fee} format={formatRupees} />
+          </dd>
         </div>
       </dl>
 
@@ -84,7 +93,7 @@ export function ReturnsCalculator() {
           delivered
         </p>
         <p className="bg-gradient-to-r from-violet to-[#b14f9a] bg-clip-text text-[2.6rem] leading-none font-semibold text-transparent tabular-nums">
-          {rupees.format(revenue)}
+          <TweenedNumber value={revenue} format={formatRupees} />
         </p>
       </div>
     </div>

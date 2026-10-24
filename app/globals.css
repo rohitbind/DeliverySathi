@@ -346,3 +346,122 @@ input[type="range"] {
     opacity: 0;
   }
 }
+
+/* ---------- Interactive touches ---------- */
+
+@property --gx {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 50%;
+}
+
+@property --gy {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 40%;
+}
+
+/* Hero light that leans toward the pointer, slowly, like light through a window. */
+.pointer-glow {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    clamp(260px, 30vw, 460px) circle at var(--gx) var(--gy),
+    color-mix(in oklab, var(--lilac) 55%, transparent),
+    transparent 70%
+  );
+  opacity: 0;
+  transition:
+    --gx 1400ms cubic-bezier(0.16, 1, 0.3, 1),
+    --gy 1400ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 900ms ease;
+}
+
+.pointer-glow[data-on="true"] {
+  opacity: 1;
+}
+
+/* Primary call: the arrow leans out toward Telegram. */
+.cta-arrow {
+  transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cta:is(:hover, :focus-visible) .cta-arrow {
+  transform: translate(2px, -2px);
+}
+
+/* Route: the card you look at lights its stop on the line. */
+.moment-node {
+  transition:
+    background-color 260ms ease,
+    color 260ms ease,
+    box-shadow 360ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 360ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.moment-card {
+  transition:
+    box-shadow 360ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 260ms ease,
+    background-color 260ms ease;
+}
+
+.moment:is(:hover, :focus-within) .moment-node {
+  background: var(--violet);
+  color: white;
+  transform: scale(1.08);
+  box-shadow:
+    0 0 0 6px color-mix(in oklab, var(--violet) 16%, transparent),
+    0 10px 24px -10px rgba(58, 42, 158, 0.6);
+}
+
+.moment:is(:hover, :focus-within) .moment-card {
+  background: color-mix(in oklab, white 74%, transparent);
+  border-color: white;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.8) inset,
+    0 36px 70px -34px rgba(58, 42, 158, 0.5);
+}
+
+/* Buyer's words: point at one line and the rest step back. */
+.outcomes > li > * {
+  transition:
+    opacity 320ms ease,
+    filter 320ms ease;
+}
+
+.outcome-pill {
+  transition:
+    transform 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 320ms ease;
+}
+
+@media (hover: hover) {
+  .outcomes:has(> li:hover) > li:not(:hover) > * {
+    opacity: 0.42;
+    filter: blur(1px);
+  }
+
+  .outcomes > li:hover .outcome-pill {
+    transform: translateX(6px);
+    box-shadow: 0 10px 24px -12px rgba(58, 42, 158, 0.5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pointer-glow {
+    display: none;
+  }
+
+  .outcomes:has(> li:hover) > li:not(:hover) > * {
+    filter: none;
+  }
+
+  .cta:is(:hover, :focus-visible) .cta-arrow,
+  .moment:is(:hover, :focus-within) .moment-node,
+  .outcomes > li:hover .outcome-pill {
+    transform: none;
+  }
+}
